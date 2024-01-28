@@ -3,7 +3,9 @@
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
-#include <iostream>
+#include <algorithm>
+
+const std::vector<char> acceptableChars = {'>', '<', '+', '.', ',', '-', '[', ']'};
 
 std::vector<Instruction> Lexer::lex()
 {
@@ -12,7 +14,7 @@ std::vector<Instruction> Lexer::lex()
 
     if (!inputFile.is_open())
     {
-        throw std::runtime_error("[ERROR]: Error happened when trying to open the file");
+        throw std::runtime_error("\u001b[1m\u001b[31m[ERROR]\u001b[0m: Failed to open file" + filePath.string());
     }
 
     std::vector<Instruction> instructions = {};
@@ -22,13 +24,18 @@ std::vector<Instruction> Lexer::lex()
     {
         if (current != '\0')
         {
-            if (c == current)
+            if (current != '\0' && c == current)
             {
                 count += 1;
             }
             else
             {
-                instructions.push_back({current, count});
+                if (std::find(acceptableChars.begin(), acceptableChars.end(), current) == acceptableChars.end())
+                {
+                    throw std::runtime_error("\u001b[1m\u001b[31m[ERROR]\u001b[0m: Unkown instruction '" + std::string(1, current) + "'");
+                }
+
+                instructions.push_back({(InstructionType)current, count});
                 count = 1;
             }
         }

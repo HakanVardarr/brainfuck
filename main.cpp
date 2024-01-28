@@ -17,7 +17,17 @@ int main(int argc, char **argv)
     }
 
     Lexer lexer(argv[1]);
-    auto instructions = lexer.lex();
+    std::vector<Instruction> instructions;
+
+    try
+    {
+        instructions = lexer.lex();
+    }
+    catch (std::runtime_error &err)
+    {
+        std::cout << err.what() << std::endl;
+        return 1;
+    }
 
     for (auto instruction : instructions)
     {
