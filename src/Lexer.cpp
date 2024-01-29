@@ -22,27 +22,29 @@ std::vector<Instruction> Lexer::lex()
     std::vector<char> instructionsChar;
     std::vector<Instruction> instructions;
 
-    // Read every char and store it inside instructionsChar vector.
+    // Read every char and store it inside instructions vector.
     char c;
     while (inputFile.get(c))
     {
         if (std::find(acceptableChars.begin(), acceptableChars.end(), c) != acceptableChars.end())
         {
-            instructionsChar.push_back(c);
-        }
-    }
+            char current = c;
+            int count = 1;
 
-    // Read ever char that stored in instructionsChar and add the Instruction to the instructions vector.
-    for (size_t i = 0; i < instructionsChar.size(); i++)
-    {
-        char current = instructionsChar[i];
-        int count = 1;
-        for (size_t j = 1; j + i < instructionsChar.size() && current == instructionsChar[i + j]; j++)
-        {
-            count++;
+            // Check for consecutive repeated characters
+            while (inputFile.get(c) && std::find(acceptableChars.begin(), acceptableChars.end(), c) != acceptableChars.end() && current == c)
+            {
+                count++;
+            }
+
+            instructions.push_back({static_cast<InstructionType>(current), count});
+
+            // We need to "undo" the last get() if it was not part of the repeated characters
+            if (c != current)
+            {
+                inputFile.unget();
+            }
         }
-        instructions.push_back({static_cast<InstructionType>(current), count});
-        i += count - 1;
     }
 
     inputFile.close();
