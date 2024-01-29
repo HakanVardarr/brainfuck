@@ -1,46 +1,50 @@
 #include "Lexer.h"
 
-#include <filesystem>
 #include <fstream>
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 
+// Acceptable charecters in brainfuck language.
 const std::vector<char> acceptableChars = {'>', '<', '+', '.', ',', '-', '[', ']'};
 
 std::vector<Instruction> Lexer::lex()
 {
-    auto filePath = std::filesystem::path(std::filesystem::current_path() / this->filePath);
+    // Open the file.
     std::ifstream inputFile(filePath);
 
+    // If something went wrong when opening the file return Error.
     if (!inputFile.is_open())
     {
-        throw std::runtime_error("\u001b[1m\u001b[31m[ERROR]\u001b[0m: Failed to open file" + filePath.string());
+        throw std::runtime_error("\u001b[1m\u001b[31m[ERROR]\u001b[0m: Failed to open file " + filePath);
     }
 
-    std::vector<Instruction> instructions = {};
-    int count = 1;
-    char c, current = '\0';
+    std::vector<char> instructionsChar;
+    std::vector<Instruction> instructions;
+
+    // Read every char and store it inside instructionsChar vector.
+    char c;
     while (inputFile.get(c))
     {
-        if (current != '\0')
+        if (std::find(acceptableChars.begin(), acceptableChars.end(), c) != acceptableChars.end())
         {
-            if (current != '\0' && c == current)
-            {
-                count += 1;
-            }
-            else
-            {
-                if (std::find(acceptableChars.begin(), acceptableChars.end(), current) == acceptableChars.end())
-                {
-                    throw std::runtime_error("\u001b[1m\u001b[31m[ERROR]\u001b[0m: Unkown instruction '" + std::string(1, current) + "'");
-                }
-
-                instructions.push_back({(InstructionType)current, count});
-                count = 1;
-            }
+            instructionsChar.push_back(c);
         }
-        current = c;
     }
 
+    // Read ever char that stored in instructionsChar and add the Instruction to the instructions vector.
+    for (size_t i = 0; i < instructionsChar.size(); i++)
+    {
+        char current = instructionsChar[i];
+        int count = 1;
+        for (size_t j = 1; j + i < instructionsChar.size() && current == instructionsChar[i + j]; j++)
+        {
+            count++;
+        }
+        instructions.push_back({static_cast<InstructionType>(current), count});
+        i += count - 1;
+    }
+
+    inputFile.close();
     return instructions;
 }

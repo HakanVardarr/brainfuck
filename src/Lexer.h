@@ -2,6 +2,9 @@
 #define BRAINFUCK_LEXER_H
 
 #include <vector>
+#include <string>
+
+// Instruction type for Instruction struct
 
 enum InstructionType
 {
@@ -15,18 +18,27 @@ enum InstructionType
     L_BRACK = '[',
 };
 
+// Instruction class for lexing. Type field refers to InstructionType for parsing. Count field refers to how many times lexer found the same type back to back.
+
 struct Instruction
 {
     InstructionType type;
     int count;
 };
 
+// Lexer class accepts filePath and lexes the files content.
+
 class Lexer
 {
-    const char *filePath;
+    const std::string filePath;
 
 public:
-    Lexer(const char *filePath) : filePath(filePath){};
+    // Constructor for lexer
+
+    Lexer(const std::string filePath) : filePath(filePath){};
+
+    // lex the file
+
     std::vector<Instruction> lex();
 };
 
