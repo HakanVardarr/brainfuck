@@ -1,5 +1,5 @@
 #ifndef BRAINFUCK_H
-#define BRAINFUCK
+#define BRAINFUCK_H
 
 #include <string>
 
